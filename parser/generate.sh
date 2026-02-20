@@ -1,0 +1,3 @@
+#!/bin/sh
+antlr4 -Dlanguage=Go -no-visitor -package parsing -o ../parsing Calculator.g4
+#go generate ./...
