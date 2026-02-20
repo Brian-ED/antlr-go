@@ -35,6 +35,11 @@
             go
             zulu # java
           ];
+          shellHook = ''
+            cd parsing
+            go generate ./...
+            cd ..
+          '';
         };
       };
     };
