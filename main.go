@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"parser/parsing"
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -119,9 +120,41 @@ func (l *MyCalculatorListener) GetResult() int {
 	return 0
 }
 
+func Accept() {}
+func ParseTree() {}
+
+// PrettyPrintTree recursively prints an ANTLR parse tree with indentation.
+// parser is needed to map rule indexes to rule names.
+func PrettyPrintTree(node antlr.ParseTree, parser antlr.Parser, depth int) {
+	indent := strings.Repeat("  ", depth) // 2 spaces per level
+
+	switch n := node.(type) {
+		case antlr.TerminalNode:
+			// Terminal nodes: just print the token text
+			text := strings.TrimSpace(n.GetText())
+			if text != "" {
+				fmt.Println(indent + text)
+			}
+		case antlr.RuleNode:
+			// Non-terminal nodes: print the rule name
+			ruleIndex := n.GetRuleContext().GetRuleIndex()
+			ruleName := parser.GetRuleNames()[ruleIndex]
+			fmt.Println(indent + ruleName)
+
+			// Recurse into children
+			for i := 0; i < n.GetChildCount(); i++ {
+				switch v := n.GetChild(i).(type) {
+					case antlr.ParseTree: PrettyPrintTree(v, parser, depth+1)
+					default: panic("Unknown type")
+				}
+			}
+		default: panic("Unhandled node")
+	}
+}
+
 func main() {
 	// Create input stream
-	input := antlr.NewInputStream("3 + 4 * 2")
+	input := antlr.NewInputStream("3 + 5 * 2")
 
 	// Create lexer
 	lexer := parsing.NewCalculatorLexer(input)
@@ -141,6 +174,8 @@ func main() {
 	// Process the parse tree with a listener
 	listener := &MyCalculatorListener{}
 	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+
+	PrettyPrintTree(tree, parser, 0)
 
 	fmt.Printf("Result: %d\n", listener.GetResult())
 }
