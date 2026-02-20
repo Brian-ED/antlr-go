@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"parser/parsing"
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -11,11 +12,16 @@ type MyCalculatorListener struct {
 	stack                          []int
 }
 
+func StackMinLen(l *MyCalculatorListener, length int) {
+	if (len(l.stack) < length) {
+		println("Stack length: ", len(l.stack), "; Expected:", length)
+		panic("Unexpected stack length")
+	}
+}
+
 // Called when exiting an addSub rule
 func (l *MyCalculatorListener) ExitAddSub(ctx *parsing.AddSubContext) {
-	if (len(l.stack) < 2) {
-		l.stack = append(l.stack, 0, 0)
-	}
+	StackMinLen(l, 2)
 	right := l.stack[len(l.stack)-1]
 	left := l.stack[len(l.stack)-2]
 	l.stack = l.stack[:len(l.stack)-2]
@@ -25,12 +31,11 @@ func (l *MyCalculatorListener) ExitAddSub(ctx *parsing.AddSubContext) {
 		case "+":
 			l.stack = append(l.stack, left+right)
 		default:
-			fmt.Printf("Hello", op)
-			panic("Hello")
-			l.stack = append(l.stack, left-right)
+			fmt.Printf("Op: ", op)
+			panic("Unexpected operator")
+			// l.stack = append(l.stack, left-right) // Old thing
 	}
 }
-
 
 // EnterTermOnly is called when entering the termOnly production.
 func (l *MyCalculatorListener) EnterTermOnly(c *parsing.TermOnlyContext) {
@@ -44,7 +49,6 @@ func (l *MyCalculatorListener) EnterAddSub(c *parsing.AddSubContext) {
 
 // EnterFactorOnly is called when entering the factorOnly production.
 func (l *MyCalculatorListener) EnterFactorOnly(c *parsing.FactorOnlyContext) {
-
 }
 
 // EnterMulDiv is called when entering the mulDiv production.
@@ -54,7 +58,13 @@ func (l *MyCalculatorListener) EnterMulDiv(c *parsing.MulDivContext) {
 
 // EnterNumber is called when entering the number production.
 func (l *MyCalculatorListener) EnterNumber(c *parsing.NumberContext) {
-
+	v, err := strconv.ParseInt(c.GetText(), 10, 32)
+	if err != nil {
+		println("token to parse:", c.GetText())
+		panic("ParseInt errored while parsing an integer literal")
+	}
+	v2 := int(v);
+	l.stack = append(l.stack, v2)
 }
 
 // EnterParentheses is called when entering the parentheses production.
@@ -83,18 +93,16 @@ func (l *MyCalculatorListener) ExitParentheses(c *parsing.ParenthesesContext) {
 }
 
 // Called when exiting an addSub rule
-func (l *MyCalculatorListener) ExitMultSub(ctx *parsing.MulDivContext) {
-	if (len(l.stack) < 2) {
-		l.stack = append(l.stack, 0, 0)
-	}
+func (l *MyCalculatorListener) ExitMulDiv(ctx *parsing.MulDivContext) {
+	StackMinLen(l, 2)
 	right := l.stack[len(l.stack)-1]
 	left := l.stack[len(l.stack)-2]
 	l.stack = l.stack[:len(l.stack)-2]
 
 	op := ctx.Op.GetText()
 	switch op {
-		case "+":
-			l.stack = append(l.stack, left+right)
+		case "*":
+			l.stack = append(l.stack, left*right)
 		default:
 			fmt.Printf("Hello", op)
 			panic("Hello")
