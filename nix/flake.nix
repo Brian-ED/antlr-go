@@ -36,7 +36,7 @@
             zulu # java
           ];
           shellHook = ''
-            cd parsing
+            cd parser
             go generate ./...
             cd ..
           '';
