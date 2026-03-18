@@ -2,11 +2,9 @@ grammar Calculator;
 
 // Parser rules
 expression
-    : term                                   # termOnly
-    | Left=expression Op=FN_NAME Right=term  # dyaCall
-    | Left=expression Op=FN_NAME             # monCall
-    | Left=expression '{' Body=expression '}' Right=term  # dyaCallBody
-    | Left=expression '{' Body=expression '}'             # monCallBody
+    : term                                    # termOnly
+    | Left=expression Op=FN_NAME Right=term*  # call
+    | Left=expression '{' Body=expression '}' Right=term*  # callBody
     ;
 
 term
