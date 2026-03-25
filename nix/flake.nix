@@ -34,6 +34,9 @@
             antlr
             go
             zulu # java
+            (python3.withPackages (p: [
+              (p.callPackage ./tangledUpInUnicode.nix {})
+            ]))
           ];
           shellHook = ''
             cd parser

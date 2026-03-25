@@ -42,7 +42,7 @@ with open("main.go", "r+") as f:
   ]
   useless = [i for i in re.findall(r"func \(l \*MyCalculatorListener\) ([A-Z][A-Za-z0-9]*) \([a-z][a-zA-Z0-9]* \*parsing\.",c) if i not in [*map((lambda x:"Enter"+x.removesuffix("Context")),VarNamesParsingCases), *map((lambda x:"Exit"+x.removesuffix("Context")),VarNamesParsingCases)]]
   if useless:
-    print("Useless:",useless)
+    print("Useless:", useless)
 
 with open("main.go", "w") as f:
   f.write('\n'.join(aL+[begin]+newB+[end]+cL))
